@@ -11,17 +11,16 @@
 
 <body>
 
-<div class="header">
-  <div class="logo">PMU Finder</div>
-  <input id="search" placeholder="Rechercher..." />
-  <button id="locate">📍</button>
-</div>
-
-<div class="main">
+<div class="app">
 
   <!-- SIDEBAR -->
   <div class="sidebar">
-    <h3>PMU trouvés</h3>
+    <h2>PMU Finder</h2>
+
+    <input id="search" placeholder="Rechercher..." />
+
+    <h3 id="count">0 PMU trouvés</h3>
+
     <div id="list"></div>
   </div>
 
@@ -31,7 +30,7 @@
 </div>
 
 <!-- FICHE PMU -->
-<div id="popup" class="hidden"></div>
+<div id="pmuCard" class="pmu-card hidden"></div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
