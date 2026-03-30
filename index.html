@@ -15,18 +15,44 @@
 
   <!-- SIDEBAR -->
   <div class="sidebar">
+
     <h2>PMU Finder</h2>
 
+    <!-- AUTH -->
+    <div class="auth">
+      <input id="email" placeholder="Email">
+      <input id="password" type="password" placeholder="Mot de passe">
+      <button id="signup">Créer</button>
+      <button id="login">Login</button>
+      <button id="logout">Logout</button>
+      <p id="userEmail"></p>
+    </div>
+
+    <!-- SEARCH -->
     <input id="search" placeholder="Rechercher..." />
+
+    <!-- ADD PMU -->
+    <button id="addBtn">➕ Ajouter un PMU</button>
 
     <h3 id="count">0 PMU trouvés</h3>
 
     <div id="list"></div>
+
   </div>
 
   <!-- MAP -->
   <div id="map"></div>
 
+</div>
+
+<!-- FORM AJOUT -->
+<div id="formPopup" class="popup hidden">
+  <input id="name" placeholder="Nom">
+  <input id="address" placeholder="Adresse">
+  <input id="phone" placeholder="Téléphone">
+  <input id="lat" placeholder="Latitude">
+  <input id="lng" placeholder="Longitude">
+  <button id="submitPMU">Valider</button>
 </div>
 
 <!-- FICHE PMU -->
