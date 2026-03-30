@@ -1,171 +1,205 @@
-const client = supabase.createClient("https://pngssqjrzkbbydwrqqtp.supabase.co/", "sb_publishable_DZV3RS-ZPiBEPlqRZNO9XQ_f2RifsOt");
+document.addEventListener("DOMContentLoaded", () => {
 
-// =======================
-// MAP
-// =======================
-const map = L.map('map').setView([48.8, 0.1], 8);
+  const client = supabase.createClient("https://pngssqjrzkbbydwrqqtp.supabase.co/", "sb_publishable_DZV3RS-ZPiBEPlqRZNO9XQ_f2RifsOt");
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
-  .addTo(map);
+  // =======================
+  // MAP
+  // =======================
+  const map = L.map('map').setView([48.8, 0.1], 8);
 
-let pmuData = [];
-let markers = [];
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
+    .addTo(map);
 
-// =======================
-// LOAD PMU
-// =======================
-async function loadPMU() {
-  const { data } = await client.from("pmu").select("*");
-  pmuData = data;
-  renderAll();
-}
+  let pmuData = [];
+  let markers = [];
 
-// =======================
-// RENDER MAP + LIST
-// =======================
-function renderAll() {
-  markers.forEach(m => map.removeLayer(m));
-  markers = [];
+  // =======================
+  // LOAD PMU
+  // =======================
+  async function loadPMU() {
+    const { data, error } = await client.from("pmu").select("*");
 
-  renderList(pmuData);
+    if (error) {
+      console.error("Erreur load PMU :", error);
+      return;
+    }
 
-  pmuData.forEach(p => {
-    if (!p.lat || !p.lng) return;
+    pmuData = data;
+    renderAll();
+  }
 
-    const m = L.marker([p.lat, p.lng]).addTo(map);
+  // =======================
+  // RENDER MAP + LIST
+  // =======================
+  function renderAll() {
+    markers.forEach(m => map.removeLayer(m));
+    markers = [];
 
-    m.on("click", () => showPMU(p));
+    renderList(pmuData);
 
-    markers.push(m);
-  });
+    pmuData.forEach(p => {
+      if (!p.lat || !p.lng) return;
 
-  document.getElementById("count").innerText =
-    pmuData.length + " PMU trouvés";
-}
+      const m = L.marker([p.lat, p.lng]).addTo(map);
 
-// =======================
-// SIDEBAR LIST
-// =======================
-function renderList(data) {
-  const list = document.getElementById("list");
-  list.innerHTML = "";
+      m.on("click", () => showPMU(p));
 
-  data.forEach(p => {
-    const div = document.createElement("div");
-    div.className = "card";
+      markers.push(m);
+    });
 
-    div.innerHTML = `<b>${p.name}</b><br>${p.address}`;
+    const countEl = document.getElementById("count");
+    if (countEl) {
+      countEl.innerText = pmuData.length + " PMU trouvés";
+    }
+  }
 
-    div.onclick = () => {
-      map.setView([p.lat, p.lng], 15);
-      showPMU(p);
-    };
+  // =======================
+  // SIDEBAR LIST
+  // =======================
+  function renderList(data) {
+    const list = document.getElementById("list");
+    if (!list) return;
 
-    list.appendChild(div);
-  });
-}
+    list.innerHTML = "";
 
-// =======================
-// PMU CARD
-// =======================
-function showPMU(p) {
-  const card = document.getElementById("pmuCard");
+    data.forEach(p => {
+      const div = document.createElement("div");
+      div.className = "card";
 
-  card.innerHTML = `
-    <div class="pmu-header">${p.name}</div>
-    <div class="pmu-body">
-      📍 ${p.address}<br><br>
-      📞 ${p.phone || "Non dispo"}
-    </div>
-  `;
+      div.innerHTML = `<b>${p.name}</b><br>${p.address}`;
 
-  card.classList.remove("hidden");
-}
+      div.onclick = () => {
+        map.setView([p.lat, p.lng], 15);
+        showPMU(p);
+      };
 
-// =======================
-// SEARCH
-// =======================
-document.getElementById("search").addEventListener("input", e => {
-  const val = e.target.value.toLowerCase();
+      list.appendChild(div);
+    });
+  }
 
-  const filtered = pmuData.filter(p =>
-    p.name.toLowerCase().includes(val)
-  );
+  // =======================
+  // PMU CARD
+  // =======================
+  function showPMU(p) {
+    const card = document.getElementById("pmuCard");
+    if (!card) return;
 
-  renderList(filtered);
-});
+    card.innerHTML = `
+      <div class="pmu-header">${p.name}</div>
+      <div class="pmu-body">
+        📍 ${p.address}<br><br>
+        📞 ${p.phone || "Non dispo"}
+      </div>
+    `;
 
-// =======================
-// AUTH CHECK (IMPORTANT)
-// =======================
-async function checkAuthUI() {
-  const { data: { session } } = await client.auth.getSession();
+    card.classList.remove("hidden");
+  }
 
+  // =======================
+  // SEARCH
+  // =======================
+  const searchInput = document.getElementById("search");
+
+  if (searchInput) {
+    searchInput.addEventListener("input", e => {
+      const val = e.target.value.toLowerCase();
+
+      const filtered = pmuData.filter(p =>
+        p.name.toLowerCase().includes(val)
+      );
+
+      renderList(filtered);
+    });
+  }
+
+  // =======================
+  // AUTH CHECK (SESSION FIX)
+  // =======================
+  async function checkAuthUI() {
+    const { data: { session } } = await client.auth.getSession();
+
+    const addBtn = document.getElementById("addBtn");
+
+    if (!session) {
+      if (addBtn) addBtn.style.display = "none";
+    } else {
+      if (addBtn) addBtn.style.display = "block";
+    }
+  }
+
+  checkAuthUI();
+
+  // =======================
+  // ADD PMU BUTTON
+  // =======================
   const addBtn = document.getElementById("addBtn");
+  const formPopup = document.getElementById("formPopup");
 
-  if (!session) {
-    addBtn.style.display = "none";
+  if (addBtn && formPopup) {
+    addBtn.onclick = () => {
+      formPopup.classList.remove("hidden");
+    };
   }
-}
 
-checkAuthUI();
+  // =======================
+  // CLICK MAP → auto coords
+  // =======================
+  map.on("click", function(e) {
+    const latInput = document.getElementById("lat");
+    const lngInput = document.getElementById("lng");
 
-// =======================
-// ADD PMU
-// =======================
-const addBtn = document.getElementById("addBtn");
-const formPopup = document.getElementById("formPopup");
+    if (latInput && lngInput) {
+      latInput.value = e.latlng.lat;
+      lngInput.value = e.latlng.lng;
+    }
+  });
 
-addBtn.onclick = () => {
-  formPopup.classList.remove("hidden");
-};
+  // =======================
+  // SUBMIT PMU
+  // =======================
+  const submitBtn = document.getElementById("submitPMU");
 
-// =======================
-// CLICK MAP → auto coords
-// =======================
-map.on("click", function(e) {
-  document.getElementById("lat").value = e.latlng.lat;
-  document.getElementById("lng").value = e.latlng.lng;
+  if (submitBtn) {
+    submitBtn.onclick = async () => {
+
+      const { data: { session } } = await client.auth.getSession();
+
+      if (!session) {
+        alert("Connecte-toi !");
+        return;
+      }
+
+      const user = session.user;
+
+      const pmu = {
+        name: document.getElementById("name").value,
+        address: document.getElementById("address").value,
+        phone: document.getElementById("phone").value,
+        lat: parseFloat(document.getElementById("lat").value),
+        lng: parseFloat(document.getElementById("lng").value),
+        user_id: user.id
+      };
+
+      const { error } = await client.from("pmu").insert([pmu]);
+
+      if (error) {
+        console.error("Erreur insert :", error);
+        alert("Erreur ❌");
+      } else {
+        alert("PMU ajouté ✅");
+
+        if (formPopup) {
+          formPopup.classList.add("hidden");
+        }
+
+        loadPMU();
+      }
+    };
+  }
+
+  // =======================
+  // INIT
+  // =======================
+  loadPMU();
+
 });
-
-// =======================
-// SUBMIT PMU (FIX SESSION)
-// =======================
-document.getElementById("submitPMU").onclick = async () => {
-
-  const { data: { session } } = await client.auth.getSession();
-
-  if (!session) {
-    alert("Connecte-toi !");
-    return;
-  }
-
-  const user = session.user;
-
-  const pmu = {
-    name: document.getElementById("name").value,
-    address: document.getElementById("address").value,
-    phone: document.getElementById("phone").value,
-    lat: parseFloat(document.getElementById("lat").value),
-    lng: parseFloat(document.getElementById("lng").value),
-    user_id: user.id
-  };
-
-  const { error } = await client.from("pmu").insert([pmu]);
-
-  if (error) {
-    console.error(error);
-    alert("Erreur lors de l'ajout ❌");
-  } else {
-    alert("PMU ajouté ✅");
-
-    formPopup.classList.add("hidden");
-
-    loadPMU();
-  }
-};
-
-// =======================
-// INIT
-// =======================
-loadPMU();
