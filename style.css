@@ -112,7 +112,7 @@ body {
   padding: 15px;
 }
 
-/* CENTER (auth/profile) */
+/* CENTER (auth) */
 .center {
   display: flex;
   flex-direction: column;
@@ -120,4 +120,43 @@ body {
   justify-content: center;
   height: 100vh;
   gap: 10px;
+}
+
+/* DASHBOARD */
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  gap: 30px;
+}
+
+.profile-card {
+  background: #020617;
+  padding: 30px;
+  border-radius: 20px;
+  border: 1px solid #1e293b;
+  text-align: center;
+}
+
+.avatar {
+  font-size: 50px;
+}
+
+.stats {
+  display: flex;
+  gap: 20px;
+}
+
+.stat {
+  background: #020617;
+  padding: 20px;
+  border-radius: 15px;
+  border: 1px solid #1e293b;
+  text-align: center;
+}
+
+.stat h3 {
+  color: #22c55e;
 }

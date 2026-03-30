@@ -7,7 +7,6 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 let pmuData = [];
 let markers = [];
 
-/* LOAD */
 async function loadPMU() {
   const { data } = await client.from("pmu").select("*");
   pmuData = data;
@@ -22,18 +21,14 @@ function renderAll() {
 
   pmuData.forEach(p => {
     const m = L.marker([p.lat, p.lng]).addTo(map);
-
     m.on("click", () => showPMU(p));
-
     markers.push(m);
   });
 
-  document.getElementById("count").innerText = pmuData.length + " PMU trouvés";
+  count.innerText = pmuData.length + " PMU trouvés";
 }
 
-/* LIST */
 function renderList(data) {
-  const list = document.getElementById("list");
   list.innerHTML = "";
 
   data.forEach(p => {
@@ -51,28 +46,20 @@ function renderList(data) {
   });
 }
 
-/* PMU CARD */
 function showPMU(p) {
-  const card = document.getElementById("pmuCard");
-
-  card.innerHTML = `
+  pmuCard.innerHTML = `
     <div class="pmu-header">${p.name}</div>
     <div class="pmu-body">
       📍 ${p.address}<br><br>
       📞 ${p.phone || ""}
     </div>
   `;
-
-  card.classList.remove("hidden");
+  pmuCard.classList.remove("hidden");
 }
 
-/* ADD PMU */
-document.getElementById("addBtn").onclick = () => {
-  document.getElementById("formPopup").classList.remove("hidden");
-};
+addBtn.onclick = () => formPopup.classList.remove("hidden");
 
-document.getElementById("submitPMU").onclick = async () => {
-
+submitPMU.onclick = async () => {
   const { data } = await client.auth.getUser();
 
   if (!data.user) {
@@ -80,27 +67,22 @@ document.getElementById("submitPMU").onclick = async () => {
     return;
   }
 
-  const pmu = {
+  await client.from("pmu").insert([{
     name: name.value,
     address: address.value,
     phone: phone.value,
     lat: parseFloat(lat.value),
     lng: parseFloat(lng.value),
     user_id: data.user.id
-  };
-
-  await client.from("pmu").insert([pmu]);
+  }]);
 
   location.reload();
 };
 
-/* SEARCH */
-document.getElementById("search").addEventListener("input", e => {
-  const val = e.target.value.toLowerCase();
-
+search.oninput = () => {
   renderList(
-    pmuData.filter(p => p.name.toLowerCase().includes(val))
+    pmuData.filter(p => p.name.toLowerCase().includes(search.value.toLowerCase()))
   );
-});
+};
 
 loadPMU();

@@ -10,12 +10,32 @@ async function loadProfile() {
 
   email.innerText = data.user.email;
 
-  const { count } = await client
+  const { count: pmuCount } = await client
     .from("pmu")
     .select("*", { count: "exact", head: true })
     .eq("user_id", data.user.id);
 
-  countPMU.innerText = count;
+  countPMU.innerText = pmuCount;
+
+  const { count: favCount } = await client
+    .from("favorites")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", data.user.id);
+
+  countFav.innerText = favCount;
+
+  const { data: reviews } = await client
+    .from("reviews")
+    .select("rating")
+    .eq("user_id", data.user.id);
+
+  let avg = 0;
+
+  if (reviews.length > 0) {
+    avg = reviews.reduce((a, b) => a + b.rating, 0) / reviews.length;
+  }
+
+  avgNote.innerText = avg.toFixed(1);
 }
 
 logout.onclick = async () => {

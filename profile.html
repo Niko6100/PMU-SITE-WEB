@@ -8,17 +8,32 @@
 
 <body>
 
-<div class="center">
+<div class="dashboard">
 
-  <h2>Mon Profil</h2>
+  <div class="profile-card">
+    <div class="avatar">👤</div>
+    <h2 id="email"></h2>
+    <button id="logout">Se déconnecter</button>
+  </div>
 
-  <p id="email"></p>
+  <div class="stats">
 
-  <h3>Mes stats</h3>
+    <div class="stat">
+      <h3 id="countPMU">0</h3>
+      <p>PMU ajoutés</p>
+    </div>
 
-  <p>PMU ajoutés : <span id="countPMU">0</span></p>
+    <div class="stat">
+      <h3 id="countFav">0</h3>
+      <p>Favoris ❤️</p>
+    </div>
 
-  <button id="logout">Se déconnecter</button>
+    <div class="stat">
+      <h3 id="avgNote">0</h3>
+      <p>Note moyenne ⭐</p>
+    </div>
+
+  </div>
 
 </div>
 
