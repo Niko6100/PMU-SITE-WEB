@@ -222,3 +222,32 @@ body {
 .hidden {
   display: none;
 }
+
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.step-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.step-nav button {
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+}
+
+#prevBtn {
+  background: #1e293b;
+  color: white;
+}
+
+#nextBtn {
+  background: #22c55e;
+  color: black;
+}
