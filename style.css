@@ -1,3 +1,4 @@
+/* GLOBAL */
 body {
   margin: 0;
   font-family: Inter, sans-serif;
@@ -20,6 +21,7 @@ body {
   overflow-y: auto;
 }
 
+/* NAV */
 .nav a {
   display: block;
   margin-bottom: 5px;
@@ -27,6 +29,7 @@ body {
   text-decoration: none;
 }
 
+/* SEARCH */
 #search {
   width: 100%;
   padding: 10px;
@@ -37,7 +40,7 @@ body {
   color: white;
 }
 
-/* BUTTON */
+/* BUTTON ADD */
 #addBtn {
   width: 100%;
   padding: 10px;
@@ -48,7 +51,7 @@ body {
   margin-bottom: 10px;
 }
 
-/* CARD */
+/* CARD LIST */
 .card {
   background: #020617;
   border: 1px solid #1e293b;
@@ -56,22 +59,27 @@ body {
   border-radius: 12px;
   margin-bottom: 10px;
   cursor: pointer;
+  transition: 0.2s;
 }
 
 .card:hover {
   border-color: #22c55e;
 }
 
-/* MAP */
+/* MAP (CADRE ARRONDI) */
 #map {
   position: absolute;
   top: 10px;
   left: 330px;
   right: 10px;
   bottom: 10px;
+
   border-radius: 20px;
   overflow: hidden;
+
   box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+
+  z-index: 1; /* IMPORTANT */
 }
 
 /* POPUP FORM */
@@ -80,14 +88,45 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+
   background: #020617;
   padding: 20px;
   border-radius: 15px;
   border: 1px solid #1e293b;
+
+  z-index: 9999; /* 🔥 FIX PRINCIPAL */
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.hidden {
-  display: none;
+.popup input {
+  padding: 8px;
+  border-radius: 8px;
+  border: none;
+  background: #1e293b;
+  color: white;
+}
+
+.popup button {
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  background: #22c55e;
+  cursor: pointer;
+}
+
+/* DARK OVERLAY (OPTION PREMIUM) */
+.popup::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  z-index: -1;
 }
 
 /* PMU CARD */
@@ -100,19 +139,21 @@ body {
   background: #020617;
   border: 1px solid #1e293b;
   overflow: hidden;
+  z-index: 2000;
 }
 
 .pmu-header {
   background: #22c55e;
   padding: 15px;
   color: black;
+  font-weight: bold;
 }
 
 .pmu-body {
   padding: 15px;
 }
 
-/* CENTER (auth) */
+/* AUTH / CENTER */
 .center {
   display: flex;
   flex-direction: column;
@@ -142,6 +183,7 @@ body {
 
 .avatar {
   font-size: 50px;
+  margin-bottom: 10px;
 }
 
 .stats {
@@ -155,12 +197,15 @@ body {
   border-radius: 15px;
   border: 1px solid #1e293b;
   text-align: center;
+  width: 120px;
 }
 
 .stat h3 {
   color: #22c55e;
+  font-size: 24px;
 }
 
+/* BACK BUTTON */
 .back-btn {
   position: absolute;
   top: 20px;
@@ -173,20 +218,7 @@ body {
   cursor: pointer;
 }
 
-.popup {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-
-  background: #020617;
-  padding: 20px;
-  border-radius: 15px;
-  border: 1px solid #1e293b;
-
-  z-index: 9999; /* 🔥 IMPORTANT */
-}
-
-#map {
-  z-index: 1;
+/* UTIL */
+.hidden {
+  display: none;
 }
