@@ -2,259 +2,192 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const client = supabase.createClient("https://pngssqjrzkbbydwrqqtp.supabase.co/", "sb_publishable_DZV3RS-ZPiBEPlqRZNO9XQ_f2RifsOt");
 
+// MAP
+const map = L.map('map').setView([48.8, 0.1], 8);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
+.addTo(map);
+
 // =======================
-  // MAP
-  // =======================
-  const map = L.map('map').setView([48.8, 0.1], 8);
+// DATA
+// =======================
+let pmuData = [];
+let selectedLat = null;
+let selectedLng = null;
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
-    .addTo(map);
+// =======================
+// LOAD PMU
+// =======================
+async function loadPMU() {
+const { data } = await client.from("pmu").select("*");
+pmuData = data;
+render();
+}
 
-  let pmuData = [];
-  let markers = [];
+function render() {
+list.innerHTML = "";
 
-  let selectedLat = null;
-  let selectedLng = null;
+pmuData.forEach(p => {
+if (!p.lat) return;
 
-  // =======================
-  // LOAD PMU
-  // =======================
-  async function loadPMU() {
-    const { data, error } = await client.from("pmu").select("*");
+const m = L.marker([p.lat, p.lng]).addTo(map);
 
-    if (error) {
-      console.error(error);
-      return;
-    }
+m.on("click", () => showPMU(p));
 
-    pmuData = data;
-    renderAll();
-  }
+const div = document.createElement("div");
+div.className = "card";
+div.innerHTML = `<b>${p.name}</b><br>${p.address}`;
 
-  // =======================
-  // RENDER
-  // =======================
-  function renderAll() {
-    markers.forEach(m => map.removeLayer(m));
-    markers = [];
+div.onclick = () => {
+map.setView([p.lat, p.lng], 15);
+};
 
-    renderList(pmuData);
+list.appendChild(div);
+});
 
-    pmuData.forEach(p => {
-      if (!p.lat || !p.lng) return;
+count.innerText = pmuData.length + " PMU";
+}
 
-      const m = L.marker([p.lat, p.lng]).addTo(map);
+function showPMU(p) {
+pmuCard.innerHTML = `
+<div class="pmu-header">${p.name}</div>
+<div class="pmu-body">
+📍 ${p.address}<br>
+📞 ${p.phone || ""}<br>
+🕒 ${p.open || ""} - ${p.close || ""}<br>
+🧩 ${(p.services || []).join(", ")}
+</div>
+`;
+pmuCard.classList.remove("hidden");
+}
 
-      m.on("click", () => showPMU(p));
+// =======================
+// FORM STEPPER
+// =======================
+let step = 1;
 
-      markers.push(m);
-    });
+const stepContent = document.getElementById("stepContent");
+const progressBar = document.getElementById("progressBar");
 
-    const count = document.getElementById("count");
-    if (count) {
-      count.innerText = pmuData.length + " PMU trouvés";
-    }
-  }
+let formData = {
+name: "",
+address: "",
+phone: "",
+open: "",
+close: "",
+services: []
+};
 
-  // =======================
-  // LIST
-  // =======================
-  function renderList(data) {
-    const list = document.getElementById("list");
-    if (!list) return;
+function renderStep() {
 
-    list.innerHTML = "";
+progressBar.style.width = (step * 25) + "%";
 
-    data.forEach(p => {
-      const div = document.createElement("div");
-      div.className = "card";
+let html = "";
 
-      div.innerHTML = `<b>${p.name}</b><br>${p.address}`;
+if (step === 1) {
+html = `
+<input id="name" placeholder="Nom" value="${formData.name}">
+<input id="address" placeholder="Adresse" value="${formData.address}">
+<input id="phone" placeholder="Téléphone" value="${formData.phone}">
+`;
+}
 
-      div.onclick = () => {
-        map.setView([p.lat, p.lng], 15);
-        showPMU(p);
-      };
+if (step === 2) {
+html = `
+<input id="open" placeholder="Ouverture" value="${formData.open}">
+<input id="close" placeholder="Fermeture" value="${formData.close}">
+`;
+}
 
-      list.appendChild(div);
-    });
-  }
+if (step === 3) {
+html = `
+<div class="services">
+${["PMU","Tabac","FDJ","Presse"].map(s => `
+<label><input type="checkbox" value="${s}" ${formData.services.includes(s)?"checked":""}> ${s}</label>
+`).join("")}
+</div>
+`;
+}
 
-  // =======================
-  // CARD PMU
-  // =======================
-  function showPMU(p) {
-    const card = document.getElementById("pmuCard");
-    if (!card) return;
+if (step === 4) {
+formPopup.classList.add("hidden");
+alert("Clique sur la carte 📍");
+return;
+}
 
-    card.innerHTML = `
-      <div class="pmu-header">${p.name}</div>
-      <div class="pmu-body">
-        📍 ${p.address}<br>
-        📞 ${p.phone || ""}<br>
-        🕒 ${p.open || ""} - ${p.close || ""}<br>
-        🧩 ${(p.services || []).join(", ")}
-      </div>
-    `;
+stepContent.innerHTML = html;
+}
 
-    card.classList.remove("hidden");
-  }
+// NAV
+nextBtn.onclick = () => {
 
-  // =======================
-  // SEARCH
-  // =======================
-  const search = document.getElementById("search");
+if (step === 1) {
+formData.name = name.value;
+formData.address = address.value;
+formData.phone = phone.value;
+}
 
-  if (search) {
-    search.oninput = () => {
-      renderList(
-        pmuData.filter(p =>
-          p.name.toLowerCase().includes(search.value.toLowerCase())
-        )
-      );
-    };
-  }
+if (step === 2) {
+formData.open = open.value;
+formData.close = close.value;
+}
 
-  // =======================
-  // AUTH CHECK
-  // =======================
-  async function checkAuthUI() {
-    const { data: { session } } = await client.auth.getSession();
+if (step === 3) {
+formData.services = [...document.querySelectorAll(".services input:checked")].map(e=>e.value);
+}
 
-    const addBtn = document.getElementById("addBtn");
+step++;
+renderStep();
+};
 
-    if (!session) {
-      if (addBtn) addBtn.style.display = "none";
-    }
-  }
+prevBtn.onclick = () => {
+if (step > 1) {
+step--;
+renderStep();
+}
+};
 
-  checkAuthUI();
+// =======================
+// MAP CLICK
+// =======================
+map.on("click", async e => {
 
-  // =======================
-  // OPEN FORM
-  // =======================
-  const addBtn = document.getElementById("addBtn");
-  const formPopup = document.getElementById("formPopup");
+if (step !== 4) return;
 
-  if (addBtn && formPopup) {
-    addBtn.onclick = () => {
-      formPopup.classList.remove("hidden");
-    };
-  }
+selectedLat = e.latlng.lat;
+selectedLng = e.latlng.lng;
 
-  // =======================
-  // MULTI STEP FORM
-  // =======================
-  let currentStep = 1;
-  const totalSteps = 4;
+const { data: { session } } = await client.auth.getSession();
 
-  const steps = [
-    document.getElementById("step1"),
-    document.getElementById("step2"),
-    document.getElementById("step3"),
-    document.getElementById("step4")
-  ];
+if (!session) {
+alert("Connecte-toi !");
+return;
+}
 
-  const prevBtn = document.getElementById("prevBtn");
-  const nextBtn = document.getElementById("nextBtn");
+const pmu = {
+...formData,
+lat: selectedLat,
+lng: selectedLng,
+user_id: session.user.id
+};
 
-  function showStep(n) {
-    steps.forEach((s, i) => {
-      if (!s) return;
-      s.classList.toggle("hidden", i !== n - 1);
-    });
+await client.from("pmu").insert([pmu]);
 
-    if (prevBtn) {
-      prevBtn.style.display = n === 1 ? "none" : "block";
-    }
+alert("PMU ajouté ✅");
 
-    if (nextBtn) {
-      nextBtn.innerText = n === totalSteps ? "Valider ✅" : "Suivant ➡";
-    }
-  }
+step = 1;
+formPopup.classList.remove("hidden");
+renderStep();
+loadPMU();
 
-  showStep(currentStep);
+});
 
-  // NEXT
-  if (nextBtn) {
-    nextBtn.onclick = async () => {
+// OPEN FORM
+addBtn.onclick = () => {
+formPopup.classList.remove("hidden");
+renderStep();
+};
 
-      if (currentStep < totalSteps) {
-        currentStep++;
-        showStep(currentStep);
-      } else {
-
-        const { data: { session } } = await client.auth.getSession();
-
-        if (!session) {
-          alert("Connecte-toi !");
-          return;
-        }
-
-        if (!selectedLat) {
-          alert("Clique sur la carte !");
-          return;
-        }
-
-        const services = [...document.querySelectorAll(".services input:checked")]
-          .map(e => e.value);
-
-        const pmu = {
-          name: document.getElementById("name").value,
-          address: document.getElementById("address").value,
-          phone: document.getElementById("phone").value,
-          open: document.getElementById("open").value,
-          close: document.getElementById("close").value,
-          services,
-          lat: selectedLat,
-          lng: selectedLng,
-          user_id: session.user.id
-        };
-
-        const { error } = await client.from("pmu").insert([pmu]);
-
-        if (error) {
-          console.error(error);
-          alert("Erreur ❌");
-        } else {
-          alert("PMU ajouté ✅");
-          location.reload();
-        }
-      }
-    };
-  }
-
-  // PREV
-  if (prevBtn) {
-    prevBtn.onclick = () => {
-      if (currentStep > 1) {
-        currentStep--;
-        showStep(currentStep);
-      }
-    };
-  }
-
-  // =======================
-  // MAP CLICK (STEP 4 ONLY)
-  // =======================
-  map.on("click", e => {
-
-    if (currentStep !== 4) return;
-
-    selectedLat = e.latlng.lat;
-    selectedLng = e.latlng.lng;
-
-    const preview = document.getElementById("coordsPreview");
-
-    if (preview) {
-      preview.innerText =
-        `📍 ${selectedLat.toFixed(5)}, ${selectedLng.toFixed(5)}`;
-    }
-  });
-
-  // =======================
-  // INIT
-  // =======================
-  loadPMU();
+loadPMU();
 
 });
