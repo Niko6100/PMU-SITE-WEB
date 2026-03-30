@@ -123,3 +123,30 @@ document.getElementById("search").addEventListener("input", e => {
 
 /* START */
 loadPMU();
+
+const signupBtn = document.getElementById("signup");
+const loginBtn = document.getElementById("login");
+const logoutBtn = document.getElementById("logout");
+
+signupBtn.onclick = async () => {
+  const email = emailInput.value;
+  const password = passwordInput.value;
+
+  const { error } = await client.auth.signUp({ email, password });
+
+  alert(error ? error.message : "Compte créé !");
+};
+
+loginBtn.onclick = async () => {
+  const email = emailInput.value;
+  const password = passwordInput.value;
+
+  const { error } = await client.auth.signInWithPassword({ email, password });
+
+  alert(error ? error.message : "Connecté !");
+};
+
+logoutBtn.onclick = async () => {
+  await client.auth.signOut();
+  alert("Déconnecté");
+};
