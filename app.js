@@ -50,8 +50,13 @@ document.getElementById("pmuForm").addEventListener("submit", async (e) => {
     lng: parseFloat(document.getElementById("lng").value)
   };
 
-  await supabase.from("pmu").insert([pmu]);
+  const { error } = await supabase.from("pmu").insert([pmu]);
 
-  alert("PMU ajouté !");
-  location.reload();
+  if (error) {
+    console.error(error);
+    alert("Erreur !");
+  } else {
+    alert("PMU ajouté !");
+    location.reload();
+  }
 });
