@@ -248,57 +248,33 @@ document.addEventListener("DOMContentLoaded", () => {
   // =======================
   // MAP CLICK → INSERT
   // =======================
-  map.on("click", async e => {
+if (error) {
+  console.error(error);
+  alert("Erreur insertion ❌");
+  return;
+}
 
-    if (step !== 4) return;
+alert("PMU ajouté ✅");
 
-    selectedLat = e.latlng.lat;
-    selectedLng = e.latlng.lng;
+// reset data
+step = 1;
+formData = {
+  name: "",
+  address: "",
+  phone: "",
+  open: "",
+  close: "",
+  services: []
+};
 
-    const { data: { session } } = await client.auth.getSession();
+selectedLat = null;
+selectedLng = null;
 
-    if (!session) {
-      alert("Connecte-toi !");
-      return;
-    }
+// ❌ ON NE ROUVRE PAS LE FORMULAIRE
+formPopup.classList.add("hidden");
 
-    const pmu = {
-      name: formData.name,
-      address: formData.address,
-      phone: formData.phone,
-      open_hour: formData.open,
-      close_hour: formData.close,
-      services: formData.services,
-      lat: selectedLat,
-      lng: selectedLng,
-      user_id: session.user.id
-    };
-
-    const { error } = await client.from("pmu").insert([pmu]);
-
-    if (error) {
-      console.error(error);
-      alert("Erreur insertion ❌");
-      return;
-    }
-
-    alert("PMU ajouté ✅");
-
-    // reset
-    step = 1;
-    formData = {
-      name: "",
-      address: "",
-      phone: "",
-      open: "",
-      close: "",
-      services: []
-    };
-
-    formPopup.classList.remove("hidden");
-    renderStep();
-    loadPMU();
-  });
+// refresh map
+loadPMU();
 
   // =======================
   // OPEN FORM
