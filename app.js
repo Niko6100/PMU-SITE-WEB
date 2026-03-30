@@ -1,8 +1,5 @@
-// connexion Supabase
-const client = window.supabase.createClient(
-  "https://pngssqjrzkbbydwrqqtp.supabase.co",
-  "sb_publishable_DZV3RS-ZPiBEPlqRZNO9XQ_f2RifsOt"
-);
+
+const client = supabase.createClient("https://pngssqjrzkbbydwrqqtp.supabase.co/", "sb_publishable_DZV3RS-ZPiBEPlqRZNO9XQ_f2RifsOt");
 
 const map = L.map('map').setView([48.8, 0.1], 8);
 
@@ -11,25 +8,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 let pmuData = [];
 let markers = [];
 
-/* FAVORIS */
-function getFav() {
-  return JSON.parse(localStorage.getItem("fav") || "[]");
-}
-
-function toggleFav(id) {
-  let fav = getFav();
-
-  if (fav.includes(id)) {
-    fav = fav.filter(f => f !== id);
-  } else {
-    fav.push(id);
-  }
-
-  localStorage.setItem("fav", JSON.stringify(fav));
-  renderList(pmuData);
-}
-
-/* LOAD PMU */
+/* LOAD */
 async function loadPMU() {
   const { data } = await client.from("pmu").select("*");
   pmuData = data;
@@ -45,7 +24,7 @@ function renderAll() {
   pmuData.forEach(p => {
     const m = L.marker([p.lat, p.lng]).addTo(map);
 
-    m.on("click", () => showPMUCard(p));
+    m.on("click", () => showPMU(p));
 
     markers.push(m);
   });
@@ -53,122 +32,76 @@ function renderAll() {
   document.getElementById("count").innerText = pmuData.length + " PMU trouvés";
 }
 
-/* SIDEBAR */
+/* LIST */
 function renderList(data) {
   const list = document.getElementById("list");
   list.innerHTML = "";
-
-  const fav = getFav();
 
   data.forEach(p => {
     const div = document.createElement("div");
     div.className = "card";
 
-    div.innerHTML = `
-      <b>${p.name}</b><br>
-      ${p.address}<br>
-
-      <div>
-        <span class="badge">PMU</span>
-        <span class="badge">Tabac</span>
-      </div>
-
-      <button onclick="event.stopPropagation(); toggleFav('${p.id}')">
-        ${fav.includes(p.id) ? "❤️" : "🤍"}
-      </button>
-    `;
+    div.innerHTML = `<b>${p.name}</b><br>${p.address}`;
 
     div.onclick = () => {
       map.setView([p.lat, p.lng], 15);
-      showPMUCard(p);
+      showPMU(p);
     };
 
     list.appendChild(div);
   });
 }
 
-/* POPUP PMU */
-function showPMUCard(p) {
+/* PMU CARD */
+function showPMU(p) {
   const card = document.getElementById("pmuCard");
 
   card.innerHTML = `
     <div class="pmu-header">${p.name}</div>
-
     <div class="pmu-body">
-
       📍 ${p.address}<br><br>
-      📞 ${p.phone || "Non dispo"}
-
-      <button class="btn"
-        onclick="window.open('https://www.google.com/maps?q=${p.lat},${p.lng}')">
-        Itinéraire Google Maps
-      </button>
-
+      📞 ${p.phone || ""}
     </div>
   `;
 
   card.classList.remove("hidden");
 }
 
+/* ADD PMU */
+document.getElementById("addBtn").onclick = () => {
+  document.getElementById("formPopup").classList.remove("hidden");
+};
+
+document.getElementById("submitPMU").onclick = async () => {
+
+  const { data } = await client.auth.getUser();
+
+  if (!data.user) {
+    alert("Connecte-toi !");
+    return;
+  }
+
+  const pmu = {
+    name: name.value,
+    address: address.value,
+    phone: phone.value,
+    lat: parseFloat(lat.value),
+    lng: parseFloat(lng.value),
+    user_id: data.user.id
+  };
+
+  await client.from("pmu").insert([pmu]);
+
+  location.reload();
+};
+
 /* SEARCH */
 document.getElementById("search").addEventListener("input", e => {
   const val = e.target.value.toLowerCase();
 
-  const filtered = pmuData.filter(p =>
-    p.name.toLowerCase().includes(val)
+  renderList(
+    pmuData.filter(p => p.name.toLowerCase().includes(val))
   );
-
-  renderList(filtered);
 });
 
-/* START */
 loadPMU();
-
-const signupBtn = document.getElementById("signup");
-const loginBtn = document.getElementById("login");
-const logoutBtn = document.getElementById("logout");
-
-signupBtn.onclick = async () => {
-  const email = emailInput.value;
-  const password = passwordInput.value;
-
-  const { error } = await client.auth.signUp({ email, password });
-
-  alert(error ? error.message : "Compte créé !");
-};
-
-loginBtn.onclick = async () => {
-  const email = emailInput.value;
-  const password = passwordInput.value;
-
-  const { error } = await client.auth.signInWithPassword({ email, password });
-
-  alert(error ? error.message : "Connecté !");
-};
-
-logoutBtn.onclick = async () => {
-  await client.auth.signOut();
-  alert("Déconnecté");
-};
-
- }
-
-  const pmu = {
-    name: document.getElementById("name").value,
-    address: document.getElementById("address").value,
-    phone: document.getElementById("phone").value,
-    lat: parseFloat(document.getElementById("lat").value),
-    lng: parseFloat(document.getElementById("lng").value),
-    user_id: data.user.id
-  };
-
-  const { error } = await client.from("pmu").insert([pmu]);
-
-  if (error) {
-    alert("Erreur");
-  } else {
-    alert("Ajouté !");
-    formPopup.classList.add("hidden");
-    loadPMU();
-  }
-};
