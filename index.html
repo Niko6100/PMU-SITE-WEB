@@ -1,76 +1,38 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>PMU Finder</title>
+<meta charset="UTF-8">
+<title>PMU Finder</title>
 
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<link rel="stylesheet" href="style.css">
 
-  <style>
-    body { margin: 0; font-family: Arial; }
-    #map { height: 90vh; }
-
-    #formContainer {
-      position: fixed;
-      top: 20%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      z-index: 1000;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    #addBtn {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      z-index: 1000;
-      padding: 10px;
-      background: black;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-  </style>
 </head>
 
 <body>
 
-<button id="addBtn">Ajouter un PMU</button>
-
-<div id="map"></div>
-
-<!-- Formulaire -->
-<div id="formContainer" class="hidden">
-  <form id="pmuForm">
-    <input id="name" placeholder="Nom" required /><br><br>
-    <input id="address" placeholder="Adresse" required /><br><br>
-    <input id="phone" placeholder="Téléphone" /><br><br>
-    <input id="lat" placeholder="Latitude" required /><br><br>
-    <input id="lng" placeholder="Longitude" required /><br><br>
-    <button type="submit">Envoyer</button>
-  </form>
+<div class="header">
+  <div class="logo">PMU Finder</div>
+  <input id="search" placeholder="Rechercher..." />
+  <button id="locate">📍</button>
 </div>
 
- <!-- authentificator -->
+<div class="main">
 
-<div id="auth">
-<input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Mot de passe">
-<button id="signup">Créer un compte</button>
-<button id="login">Se connecter</button>
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <h3>PMU trouvés</h3>
+    <div id="list"></div>
+  </div>
 
-<!-- optionnel -->
-<button id="logout">Se déconnecter</button>
-<p id="userEmail"></p>
+  <!-- MAP -->
+  <div id="map"></div>
 
-<!-- Scripts -->
+</div>
+
+<!-- FICHE PMU -->
+<div id="popup" class="hidden"></div>
+
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 <script src="app.js"></script>
