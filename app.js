@@ -150,3 +150,25 @@ logoutBtn.onclick = async () => {
   await client.auth.signOut();
   alert("Déconnecté");
 };
+
+ }
+
+  const pmu = {
+    name: document.getElementById("name").value,
+    address: document.getElementById("address").value,
+    phone: document.getElementById("phone").value,
+    lat: parseFloat(document.getElementById("lat").value),
+    lng: parseFloat(document.getElementById("lng").value),
+    user_id: data.user.id
+  };
+
+  const { error } = await client.from("pmu").insert([pmu]);
+
+  if (error) {
+    alert("Erreur");
+  } else {
+    alert("Ajouté !");
+    formPopup.classList.add("hidden");
+    loadPMU();
+  }
+};
