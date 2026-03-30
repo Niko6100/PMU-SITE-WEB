@@ -1,30 +1,44 @@
+// connexion Supabase
 const client = window.supabase.createClient(
   "https://pngssqjrzkbbydwrqqtp.supabase.co",
   "sb_publishable_DZV3RS-ZPiBEPlqRZNO9XQ_f2RifsOt"
 );
 
+// =======================
 // MAP
+// =======================
 const map = L.map('map').setView([48.8, 0.1], 8);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
   .addTo(map);
 
-// Charger PMU
+// =======================
+// CHARGER LES PMU
+// =======================
 async function loadPMU() {
-  const { data } = await supabase
+  const { data, error } = await client
     .from('pmu')
     .select('*');
 
+  if (error) {
+    console.error("Erreur chargement :", error);
+    return;
+  }
+
   data.forEach(p => {
-    L.marker([p.lat, p.lng])
-      .addTo(map)
-      .bindPopup(`<b>${p.name}</b><br>${p.address}`);
+    if (p.lat && p.lng) {
+      L.marker([p.lat, p.lng])
+        .addTo(map)
+        .bindPopup(`<b>${p.name}</b><br>${p.address || ""}`);
+    }
   });
 }
 
 loadPMU();
 
+// =======================
 // FORMULAIRE
+// =======================
 const formContainer = document.getElementById("formContainer");
 const addBtn = document.getElementById("addBtn");
 
@@ -32,18 +46,17 @@ addBtn.onclick = () => {
   formContainer.classList.toggle("hidden");
 };
 
-// Click map pour coords
+// =======================
+// CLICK MAP → coordonnées
+// =======================
 map.on("click", function(e) {
   document.getElementById("lat").value = e.latlng.lat;
   document.getElementById("lng").value = e.latlng.lng;
 });
 
-// Envoi
-const client = window.supabase.createClient(
-  "https://pngssqjrzkbbydwrqqtp.supabase.co",
-  "sb_publishable_DZV3RS-ZPiBEPlqRZNO9XQ_f2RifsOt"
-);
-
+// =======================
+// ENVOI FORMULAIRE
+// =======================
 document.getElementById("pmuForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -58,10 +71,18 @@ document.getElementById("pmuForm").addEventListener("submit", async (e) => {
   const { error } = await client.from("pmu").insert([pmu]);
 
   if (error) {
-    console.error(error);
-    alert("Erreur !");
+    console.error("Erreur insertion :", error);
+    alert("Erreur lors de l'ajout ❌");
   } else {
-    alert("PMU ajouté !");
-    location.reload();
+    alert("PMU ajouté ✅");
+
+    // recharge les markers sans reload
+    map.eachLayer(layer => {
+      if (layer instanceof L.Marker) {
+        map.removeLayer(layer);
+      }
+    });
+
+    loadPMU();
   }
 });
