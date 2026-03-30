@@ -1,64 +1,105 @@
 body {
   margin: 0;
-  font-family: Arial;
-  background: #0f172a;
+  font-family: Inter, sans-serif;
+  background: #020617;
   color: white;
 }
 
-.header {
-  height: 60px;
-  background: #020617;
+/* LAYOUT */
+.app {
   display: flex;
-  align-items: center;
-  padding: 0 15px;
-  gap: 10px;
 }
 
-.logo {
-  color: #22c55e;
-  font-weight: bold;
+/* SIDEBAR */
+.sidebar {
+  width: 320px;
+  height: 100vh;
+  padding: 15px;
+  background: #020617;
+  border-right: 1px solid #1e293b;
+  overflow-y: auto;
 }
 
 #search {
-  flex: 1;
-  padding: 8px;
-  border-radius: 8px;
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
   border: none;
+  margin-bottom: 10px;
   background: #1e293b;
   color: white;
 }
 
-.main {
-  display: flex;
-  height: calc(100vh - 60px);
-}
-
-.sidebar {
-  width: 300px;
-  background: #020617;
-  padding: 10px;
-  overflow-y: auto;
-}
-
+/* CARD */
 .card {
-  background: #0f172a;
-  padding: 10px;
-  border-radius: 10px;
+  background: #020617;
+  border: 1px solid #1e293b;
+  padding: 12px;
+  border-radius: 12px;
   margin-bottom: 10px;
   cursor: pointer;
+  transition: 0.2s;
 }
 
+.card:hover {
+  border-color: #22c55e;
+}
+
+/* BADGE */
+.badge {
+  background: #1e293b;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  margin-right: 5px;
+}
+
+/* MAP CADRE */
 #map {
-  flex: 1;
+  position: absolute;
+
+  top: 10px;
+  left: 330px;
+  right: 10px;
+  bottom: 10px;
+
+  border-radius: 20px;
+  overflow: hidden;
+
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
 }
 
-#popup {
+/* PMU CARD */
+.pmu-card {
   position: fixed;
   right: 20px;
   bottom: 20px;
+  width: 320px;
+  border-radius: 20px;
+  overflow: hidden;
   background: #020617;
+  border: 1px solid #1e293b;
+}
+
+.pmu-header {
+  background: #22c55e;
   padding: 15px;
+  color: black;
+  font-weight: bold;
+}
+
+.pmu-body {
+  padding: 15px;
+}
+
+.btn {
+  width: 100%;
+  background: #22c55e;
+  padding: 10px;
+  border: none;
   border-radius: 10px;
+  margin-top: 10px;
+  cursor: pointer;
 }
 
 .hidden {
