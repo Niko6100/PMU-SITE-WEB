@@ -39,6 +39,11 @@ map.on("click", function(e) {
 });
 
 // Envoi
+const client = window.supabase.createClient(
+  "https://TON_URL.supabase.co",
+  "TA_PUBLISHABLE_KEY"
+);
+
 document.getElementById("pmuForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -50,7 +55,7 @@ document.getElementById("pmuForm").addEventListener("submit", async (e) => {
     lng: parseFloat(document.getElementById("lng").value)
   };
 
-  const { error } = await supabase.from("pmu").insert([pmu]);
+  const { error } = await client.from("pmu").insert([pmu]);
 
   if (error) {
     console.error(error);
