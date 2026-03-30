@@ -1,4 +1,3 @@
-
 const client = supabase.createClient("https://pngssqjrzkbbydwrqqtp.supabase.co/", "sb_publishable_DZV3RS-ZPiBEPlqRZNO9XQ_f2RifsOt");
 
 const map = L.map('map').setView([48.8, 0.1], 8);
