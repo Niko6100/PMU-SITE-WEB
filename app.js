@@ -40,8 +40,8 @@ map.on("click", function(e) {
 
 // Envoi
 const client = window.supabase.createClient(
-  "https://TON_URL.supabase.co",
-  "TA_PUBLISHABLE_KEY"
+  "https://pngssqjrzkbbydwrqqtp.supabase.co",
+  "sb_publishable_DZV3RS-ZPiBEPlqRZNO9XQ_f2RifsOt"
 );
 
 document.getElementById("pmuForm").addEventListener("submit", async (e) => {
