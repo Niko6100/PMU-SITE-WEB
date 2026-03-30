@@ -160,3 +160,15 @@ body {
 .stat h3 {
   color: #22c55e;
 }
+
+.back-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: #1e293b;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+}
