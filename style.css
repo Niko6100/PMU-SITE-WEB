@@ -172,3 +172,21 @@ body {
   color: white;
   cursor: pointer;
 }
+
+.popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  background: #020617;
+  padding: 20px;
+  border-radius: 15px;
+  border: 1px solid #1e293b;
+
+  z-index: 9999; /* 🔥 IMPORTANT */
+}
+
+#map {
+  z-index: 1;
+}
