@@ -4,180 +4,115 @@ const client = window.supabase.createClient(
   "sb_publishable_DZV3RS-ZPiBEPlqRZNO9XQ_f2RifsOt"
 );
 
-// =======================
-// MAP
-// =======================
 const map = L.map('map').setView([48.8, 0.1], 8);
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
-  .addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-// =======================
-// CHARGER LES PMU
-// =======================
-async function loadPMU() {
-  const { data, error } = await client
-    .from('pmu')
-    .select('*');
+let userPos = null;
+let pmuData = [];
+let markers = [];
 
-  if (error) {
-    console.error("Erreur chargement :", error);
-    return;
-  }
-
-  data.forEach(p => {
-    if (p.lat && p.lng) {
-      L.marker([p.lat, p.lng])
-        .addTo(map)
-        .bindPopup(`<b>${p.name}</b><br>${p.address || ""}`);
-    }
+// 📍 géolocalisation
+document.getElementById("locate").onclick = () => {
+  navigator.geolocation.getCurrentPosition(pos => {
+    userPos = [pos.coords.latitude, pos.coords.longitude];
+    map.setView(userPos, 12);
   });
-}
-
-loadPMU();
-
-// =======================
-// FORMULAIRE
-// =======================
-const formContainer = document.getElementById("formContainer");
-const addBtn = document.getElementById("addBtn");
-
-addBtn.onclick = () => {
-  formContainer.classList.toggle("hidden");
 };
 
-// =======================
-// CLICK MAP → coordonnées
-// =======================
-map.on("click", function(e) {
-  document.getElementById("lat").value = e.latlng.lat;
-  document.getElementById("lng").value = e.latlng.lng;
-});
-
-// =======================
-// ENVOI FORMULAIRE
-// =======================
-document.getElementById("pmuForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const pmu = {
-    name: document.getElementById("name").value,
-    address: document.getElementById("address").value,
-    phone: document.getElementById("phone").value,
-    lat: parseFloat(document.getElementById("lat").value),
-    lng: parseFloat(document.getElementById("lng").value)
-  };
-
-  const { error } = await client.from("pmu").insert([pmu]);
-
-  if (error) {
-    console.error("Erreur insertion :", error);
-    alert("Erreur lors de l'ajout ❌");
-  } else {
-    alert("PMU ajouté ✅");
-
-    // recharge les markers sans reload
-    map.eachLayer(layer => {
-      if (layer instanceof L.Marker) {
-        map.removeLayer(layer);
-      }
-    });
-
-    loadPMU();
-  }
-});
-
-// =======================
-// AUTHENTIFICATION
-// =======================
-
-document.addEventListener("DOMContentLoaded", () => {
-
-  const signupBtn = document.getElementById("signup");
-  const loginBtn = document.getElementById("login");
-  const logoutBtn = document.getElementById("logout"); // optionnel
-
-  // =======================
-  // INSCRIPTION
-  // =======================
-if (signupBtn) {
-  signupBtn.onclick = async () => {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-
-    if (!email || !password) {
-      alert("Remplis les champs !");
-      return;
-    }
-
-    const { data, error } = await client.auth.signUp({
-      email: email,
-      password: password
-    });
-
-    console.log("SIGNUP:", data, error);
-
-    if (error) {
-      alert(error.message);
-    } else {
-      alert("Compte créé !");
-    }
-  };
+// ❤️ favoris
+function getFavorites() {
+  return JSON.parse(localStorage.getItem("fav") || "[]");
 }
 
-  // =======================
-  // CONNEXION
-  // =======================
-  if (loginBtn) {
-    loginBtn.onclick = async () => {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+function toggleFav(id) {
+  let fav = getFavorites();
+  if (fav.includes(id)) {
+    fav = fav.filter(f => f !== id);
+  } else {
+    fav.push(id);
+  }
+  localStorage.setItem("fav", JSON.stringify(fav));
+  renderList(pmuData);
+}
 
-      const { error } = await client.auth.signInWithPassword({
-        email,
-        password
+// 📊 distance
+function getDistance(a, b) {
+  return map.distance(a, b) / 1000;
+}
+
+// 🔥 charger PMU
+async function loadPMU() {
+  const { data } = await client.from("pmu").select("*");
+  pmuData = data;
+  renderAll();
+}
+
+function renderAll() {
+  markers.forEach(m => map.removeLayer(m));
+  markers = [];
+
+  renderList(pmuData);
+
+  pmuData.forEach(p => {
+    const m = L.marker([p.lat, p.lng]).addTo(map);
+
+    m.on("click", () => showPopup(p));
+
+    markers.push(m);
   });
+}
 
-      if (error) {
-        alert(error.message);
-      } else {
-        alert("Connecté !");
-        checkUser(); // met à jour l'état
-      }
+// 📋 sidebar
+function renderList(data) {
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  const fav = getFavorites();
+
+  data.forEach(p => {
+    const div = document.createElement("div");
+    div.className = "card";
+
+    div.innerHTML = `
+      <b>${p.name}</b><br>
+      ${p.address}<br>
+      <button onclick="event.stopPropagation(); toggleFav('${p.id}')">
+        ${fav.includes(p.id) ? "❤️" : "🤍"}
+      </button>
+    `;
+
+    div.onclick = () => {
+      map.setView([p.lat, p.lng], 15);
+      showPopup(p);
     };
-  }
 
-  // =======================
-  // DECONNEXION (OPTIONNEL)
-  // =======================
-  if (logoutBtn) {
-    logoutBtn.onclick = async () => {
-      await client.auth.signOut();
-      alert("Déconnecté !");
-      checkUser();
-    };
-  }
+    list.appendChild(div);
+  });
+}
 
-  // =======================
-  // VERIFIER UTILISATEUR
-  // =======================
-  async function checkUser() {
-    const { data } = await client.auth.getUser();
+// 📍 popup
+function showPopup(p) {
+  const popup = document.getElementById("popup");
 
-    if (data.user) {
-      console.log("Utilisateur connecté :", data.user.email);
+  popup.innerHTML = `
+    <h3>${p.name}</h3>
+    <p>${p.address}</p>
+    <p>${p.phone || ""}</p>
+  `;
 
-      // exemple : afficher email
-      if (document.getElementById("userEmail")) {
-        document.getElementById("userEmail").innerText = data.user.email;
-      }
+  popup.classList.remove("hidden");
+}
 
-    } else {
-      console.log("Aucun utilisateur connecté");
-    }
-  }
+// 🔍 filtre distance
+document.getElementById("search").addEventListener("input", e => {
+  const val = e.target.value.toLowerCase();
 
-  // check au chargement
-  checkUser();
+  const filtered = pmuData.filter(p =>
+    p.name.toLowerCase().includes(val)
+  );
 
+  renderList(filtered);
 });
+
+loadPMU();
