@@ -86,3 +86,91 @@ document.getElementById("pmuForm").addEventListener("submit", async (e) => {
     loadPMU();
   }
 });
+
+// =======================
+// AUTHENTIFICATION
+// =======================
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const signupBtn = document.getElementById("signup");
+  const loginBtn = document.getElementById("login");
+  const logoutBtn = document.getElementById("logout"); // optionnel
+
+  // =======================
+  // INSCRIPTION
+  // =======================
+  if (signupBtn) {
+    signupBtn.onclick = async () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      const { error } = await client.auth.signUp({
+        email,
+        password
+      });
+
+      if (error) {
+        alert(error.message);
+      } else {
+        alert("Compte créé !");
+      }
+    };
+  }
+
+  // =======================
+  // CONNEXION
+  // =======================
+  if (loginBtn) {
+    loginBtn.onclick = async () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      const { error } = await client.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        alert(error.message);
+      } else {
+        alert("Connecté !");
+        checkUser(); // met à jour l'état
+      }
+    };
+  }
+
+  // =======================
+  // DECONNEXION (OPTIONNEL)
+  // =======================
+  if (logoutBtn) {
+    logoutBtn.onclick = async () => {
+      await client.auth.signOut();
+      alert("Déconnecté !");
+      checkUser();
+    };
+  }
+
+  // =======================
+  // VERIFIER UTILISATEUR
+  // =======================
+  async function checkUser() {
+    const { data } = await client.auth.getUser();
+
+    if (data.user) {
+      console.log("Utilisateur connecté :", data.user.email);
+
+      // exemple : afficher email
+      if (document.getElementById("userEmail")) {
+        document.getElementById("userEmail").innerText = data.user.email;
+      }
+
+    } else {
+      console.log("Aucun utilisateur connecté");
+    }
+  }
+
+  // check au chargement
+  checkUser();
+
+});
