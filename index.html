@@ -13,6 +13,7 @@
 
 <div class="app">
 
+  <!-- SIDEBAR -->
   <div class="sidebar">
 
     <h2>PMU Finder</h2>
@@ -32,19 +33,55 @@
 
   </div>
 
+  <!-- MAP -->
   <div id="map"></div>
 
 </div>
 
+<!-- FORMULAIRE -->
 <div id="formPopup" class="popup hidden">
-  <input id="name" placeholder="Nom">
-  <input id="address" placeholder="Adresse">
-  <input id="phone" placeholder="Téléphone">
-  <input id="lat" placeholder="Latitude">
-  <input id="lng" placeholder="Longitude">
-  <button id="submitPMU">Valider</button>
+
+  <div class="form-card">
+
+    <h2>Ajouter un PMU</h2>
+
+    <input id="name" placeholder="Nom du PMU" />
+    <input id="address" placeholder="Adresse" />
+    <input id="phone" placeholder="Téléphone" />
+
+    <!-- MODE -->
+    <div class="mode-select">
+      <label><input type="radio" name="mode" value="map" checked> 📍 Carte</label>
+      <label><input type="radio" name="mode" value="manual"> ✍️ Manuel</label>
+    </div>
+
+    <!-- COORDS -->
+    <div id="coordsInputs" class="coords hidden">
+      <input id="lat" placeholder="Latitude" />
+      <input id="lng" placeholder="Longitude" />
+    </div>
+
+    <!-- HORAIRES -->
+    <div class="hours">
+      <input id="open" placeholder="Ouverture (08:00)" />
+      <input id="close" placeholder="Fermeture (20:00)" />
+    </div>
+
+    <!-- SERVICES -->
+    <div class="services">
+      <label><input type="checkbox" value="PMU"> PMU</label>
+      <label><input type="checkbox" value="Tabac"> Tabac</label>
+      <label><input type="checkbox" value="FDJ"> FDJ</label>
+      <label><input type="checkbox" value="Presse"> Presse</label>
+    </div>
+
+    <button id="submitPMU">Ajouter</button>
+
+  </div>
+
 </div>
 
+<!-- CARD -->
 <div id="pmuCard" class="pmu-card hidden"></div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
