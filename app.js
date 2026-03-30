@@ -100,23 +100,30 @@ document.addEventListener("DOMContentLoaded", () => {
   // =======================
   // INSCRIPTION
   // =======================
-  if (signupBtn) {
-    signupBtn.onclick = async () => {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+if (signupBtn) {
+  signupBtn.onclick = async () => {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
 
-      const { error } = await client.auth.signUp({
-        email,
-        password
-      });
+    if (!email || !password) {
+      alert("Remplis les champs !");
+      return;
+    }
 
-      if (error) {
-        alert(error.message);
-      } else {
-        alert("Compte créé !");
-      }
-    };
-  }
+    const { data, error } = await client.auth.signUp({
+      email: email,
+      password: password
+    });
+
+    console.log("SIGNUP:", data, error);
+
+    if (error) {
+      alert(error.message);
+    } else {
+      alert("Compte créé !");
+    }
+  };
+}
 
   // =======================
   // CONNEXION
@@ -129,7 +136,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const { error } = await client.auth.signInWithPassword({
         email,
         password
-      });
+  });
 
       if (error) {
         alert(error.message);
