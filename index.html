@@ -15,7 +15,6 @@
 
   <!-- SIDEBAR -->
   <div class="sidebar">
-
     <h2>PMU Finder</h2>
 
     <div class="nav">
@@ -30,7 +29,6 @@
     <h3 id="count">0 PMU trouvés</h3>
 
     <div id="list"></div>
-
   </div>
 
   <!-- MAP -->
@@ -38,49 +36,25 @@
 
 </div>
 
-<!-- FORMULAIRE -->
+<!-- POPUP -->
 <div id="formPopup" class="popup hidden">
-
   <div class="form-card">
 
-    <h2>Ajouter un PMU</h2>
-
-    <!-- STEP 1 -->
-    <div class="step" id="step1">
-      <input id="name" placeholder="Nom du PMU" />
-      <input id="address" placeholder="Adresse" />
-      <input id="phone" placeholder="Téléphone" />
+    <div class="progress">
+      <div id="progressBar"></div>
     </div>
 
-    <!-- STEP 2 -->
-    <div class="step hidden" id="step2">
-      <input id="open" placeholder="Ouverture (08:00)" />
-      <input id="close" placeholder="Fermeture (20:00)" />
-    </div>
+    <div id="stepContent"></div>
 
-    <!-- STEP 3 -->
-    <div class="step hidden" id="step3">
-      <div class="services">
-        <label><input type="checkbox" value="PMU"> PMU</label>
-        <label><input type="checkbox" value="Tabac"> Tabac</label>
-        <label><input type="checkbox" value="FDJ"> FDJ</label>
-        <label><input type="checkbox" value="Presse"> Presse</label>
-      </div>
-    </div>
-
-    <!-- STEP 4 -->
-    <div class="step hidden" id="step4">
-      <p>📍 Clique sur la carte pour choisir l’emplacement</p>
-      <p id="coordsPreview">Aucune position sélectionnée</p>
-    </div>
-
-    <!-- NAVIGATION -->
     <div class="step-nav">
-      <button id="prevBtn">⬅ Retour</button>
-      <button id="nextBtn">Suivant ➡</button>
+      <button id="prevBtn">← Retour</button>
+      <button id="nextBtn">Suivant →</button>
     </div>
 
-<!-- CARD -->
+  </div>
+</div>
+
+<!-- PMU CARD -->
 <div id="pmuCard" class="pmu-card hidden"></div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
