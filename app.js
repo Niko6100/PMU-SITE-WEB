@@ -8,40 +8,28 @@ const map = L.map('map').setView([48.8, 0.1], 8);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-let userPos = null;
 let pmuData = [];
 let markers = [];
 
-// 📍 géolocalisation
-document.getElementById("locate").onclick = () => {
-  navigator.geolocation.getCurrentPosition(pos => {
-    userPos = [pos.coords.latitude, pos.coords.longitude];
-    map.setView(userPos, 12);
-  });
-};
-
-// ❤️ favoris
-function getFavorites() {
+/* FAVORIS */
+function getFav() {
   return JSON.parse(localStorage.getItem("fav") || "[]");
 }
 
 function toggleFav(id) {
-  let fav = getFavorites();
+  let fav = getFav();
+
   if (fav.includes(id)) {
     fav = fav.filter(f => f !== id);
   } else {
     fav.push(id);
   }
+
   localStorage.setItem("fav", JSON.stringify(fav));
   renderList(pmuData);
 }
 
-// 📊 distance
-function getDistance(a, b) {
-  return map.distance(a, b) / 1000;
-}
-
-// 🔥 charger PMU
+/* LOAD PMU */
 async function loadPMU() {
   const { data } = await client.from("pmu").select("*");
   pmuData = data;
@@ -57,18 +45,20 @@ function renderAll() {
   pmuData.forEach(p => {
     const m = L.marker([p.lat, p.lng]).addTo(map);
 
-    m.on("click", () => showPopup(p));
+    m.on("click", () => showPMUCard(p));
 
     markers.push(m);
   });
+
+  document.getElementById("count").innerText = pmuData.length + " PMU trouvés";
 }
 
-// 📋 sidebar
+/* SIDEBAR */
 function renderList(data) {
   const list = document.getElementById("list");
   list.innerHTML = "";
 
-  const fav = getFavorites();
+  const fav = getFav();
 
   data.forEach(p => {
     const div = document.createElement("div");
@@ -77,6 +67,12 @@ function renderList(data) {
     div.innerHTML = `
       <b>${p.name}</b><br>
       ${p.address}<br>
+
+      <div>
+        <span class="badge">PMU</span>
+        <span class="badge">Tabac</span>
+      </div>
+
       <button onclick="event.stopPropagation(); toggleFav('${p.id}')">
         ${fav.includes(p.id) ? "❤️" : "🤍"}
       </button>
@@ -84,27 +80,37 @@ function renderList(data) {
 
     div.onclick = () => {
       map.setView([p.lat, p.lng], 15);
-      showPopup(p);
+      showPMUCard(p);
     };
 
     list.appendChild(div);
   });
 }
 
-// 📍 popup
-function showPopup(p) {
-  const popup = document.getElementById("popup");
+/* POPUP PMU */
+function showPMUCard(p) {
+  const card = document.getElementById("pmuCard");
 
-  popup.innerHTML = `
-    <h3>${p.name}</h3>
-    <p>${p.address}</p>
-    <p>${p.phone || ""}</p>
+  card.innerHTML = `
+    <div class="pmu-header">${p.name}</div>
+
+    <div class="pmu-body">
+
+      📍 ${p.address}<br><br>
+      📞 ${p.phone || "Non dispo"}
+
+      <button class="btn"
+        onclick="window.open('https://www.google.com/maps?q=${p.lat},${p.lng}')">
+        Itinéraire Google Maps
+      </button>
+
+    </div>
   `;
 
-  popup.classList.remove("hidden");
+  card.classList.remove("hidden");
 }
 
-// 🔍 filtre distance
+/* SEARCH */
 document.getElementById("search").addEventListener("input", e => {
   const val = e.target.value.toLowerCase();
 
@@ -115,4 +121,5 @@ document.getElementById("search").addEventListener("input", e => {
   renderList(filtered);
 });
 
+/* START */
 loadPMU();
