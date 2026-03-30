@@ -1,6 +1,6 @@
 const supabase = supabase.createClient(
-  "https://TON_URL.supabase.co",
-  "TON_ANON_KEY"
+  "https://pngssqjrzkbbydwrqqtp.supabase.co",
+  "sb_publishable_DZV3RS-ZPiBEPlqRZNO9XQ_f2RifsOt"
 );
 
 // MAP
